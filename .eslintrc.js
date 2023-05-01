@@ -5,7 +5,8 @@ module.exports = {
   },
   extends: [
     'plugin:vue/essential',
-    '@vue/standard'
+    'eslint:recommended',
+    'plugin:vue/strongly-recommended'
   ],
   parserOptions: {
     parser: '@babel/eslint-parser'
