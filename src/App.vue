@@ -5,6 +5,7 @@
 </template>
 
 <style lang="scss">
+@import "../css/globalCSS.css";
 #app {
   display: flex;
   justify-content: center;

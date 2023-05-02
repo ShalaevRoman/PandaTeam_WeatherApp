@@ -67,11 +67,9 @@ export default {
       height: 30px;
       background-color: initial;
       background-image: linear-gradient(-180deg, #018649, #175d3d);
-      border-radius: 5px;
+      border-radius: 10px;
       box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
       text-decoration: none;
-      color: #FFFFFF;
-      font-size: 20px;
       cursor: pointer;
       overflow: hidden;
       padding: 0 20px;
