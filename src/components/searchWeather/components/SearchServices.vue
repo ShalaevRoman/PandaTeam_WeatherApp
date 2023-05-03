@@ -4,7 +4,7 @@
       v-if="isCityFound"
       class="input-search__error-text"
     >
-      City not found
+      City not found!
     </p>
     <input
       class="input-search__input"
@@ -49,7 +49,7 @@ export default {
     ...mapActions('weatherData', ['getWeatherByGeo', 'getLocation']),
     handleInput: debounce(function () {
         this.getLocation(this.search)
-      }, 500),
+      }, 600),
     selectCity(city) {
       this.getWeatherByGeo({ lat: city.geometry.coordinates[1], lon: city.geometry.coordinates[0] })
       this.$store.commit('weatherData/SET_CITY_LIST', [])
@@ -71,12 +71,15 @@ export default {
   position: relative;
 
   .input-search__error-text {
-    font-size: 10px;
+    position: absolute;
+    top: -25px;
+    font-size: 14px;
     color: red;
     font-family: 'Ultra', sans-serif;
   }
 
   .input-search__input {
+    margin-top: 15px;
     width: 350px;
     padding: 15px;
     font-size: 12px;
@@ -98,7 +101,7 @@ export default {
     max-width: 350px;
     padding: 12px;
     position: absolute;
-    top: 50px;
+    top: 68px;
     background-color: #dcdcdc;
     border: 1px solid #3d3d3d;
     border-radius: 10px;
@@ -114,6 +117,20 @@ export default {
 
     .input-search__dropdown-item:hover {
       background-color: #ccc;
+    }
+  }
+}
+
+@media screen and (max-width: 460px) {
+  .input-search {
+
+    .input-search__input {
+      width: 310px;
+    }
+
+    .input-search__dropdown {
+      min-width: 310px;
+      max-width: 310px;
     }
   }
 }

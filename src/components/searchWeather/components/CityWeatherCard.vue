@@ -1,8 +1,14 @@
 <template>
   <div
-    v-if="isShowWeatherCard"
     class="city-card__wrapper"
   >
+    <ModalComponent
+      v-if="isOpenModal"
+      @delete="removeItem"
+    />
+    <LimitModal
+      v-if="isLimitExceeded"
+    />
     <div class="city-card__item">
       <h3 class="city-card__title">
         Weather data
@@ -17,14 +23,35 @@
           </button>
         </div>
         <div class="item-action__group-control">
-          <button class="item-action__button--yellow">
+          <div
+            v-if="selectedCity.isFavorite"
+            class="item-action-favorite-icon"
+          >
+            <img
+              src="../../../assets/rating.png"
+              alt="favorite"
+            >
+          </div>
+          <button
+            v-if="!selectedCity.isFavorite"
+            @click="addToFavoritesList()"
+            class="item-action__button--yellow"
+          >
             Favorites
           </button>
           <button
             v-if="selectedCity.isShowAddButton"
             class="item-action__button--green"
+            @click="addBlockToList()"
           >
             + Add block
+          </button>
+          <button
+            v-if="selectedCity.isShowDeleteButton"
+            class="item-action__button--red"
+            @click="openModal()"
+          >
+            Delete
           </button>
         </div>
       </div>
@@ -54,36 +81,95 @@
           </span>
         </p>
       </div>
+      <BarChart
+        :labels="labelsForBarChart"
+        :chart-indicators="chartIndicators"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import {mapActions, mapGetters} from "vuex";
+import BarChart from "@/components/searchWeather/components/BarChart.vue";
+import ModalComponent from "@/views/Modal.vue";
+import LimitModal from "@/views/LimitModal.vue";
 
 export default {
   name: 'CityWeatherCard',
+  components: {LimitModal, ModalComponent, BarChart },
+  props: {
+    selectedCity: {
+      required: true,
+      type: Object,
+      default () {
+        return null
+      }
+    }
+  },
   data () {
-    return {}
+    return {
+      labelsForBarChart: [],
+      chartIndicators: []
+    }
   },
   computed: {
-    ...mapGetters('weatherData', ['selectedCity', 'isShowWeatherCard']),
-    filteredItems() {
+    ...mapGetters('weatherData', ['isOpenModal', 'isLimitExceeded']),
+    filteredOnToday() {
       const today = new Date().toISOString().slice(0, 10)
       return this.selectedCity.list.filter(item => item.dt_txt.slice(0, 10) === today)
     }
   },
   methods: {
+    ...mapActions('weatherData', ['addItemToBlockList', 'removeItemFromBlockList', 'addItemToFavoriteList', 'removeItemFromFavorite']),
     formattedTime (time) {
       const sunriseDate = new Date(time * 1000)
       return sunriseDate.toLocaleTimeString()
+    },
+    getTimeLabelsArray(dateArray) {
+      const timeArray = []
+      for (let i = 0; i < dateArray.length; i++) {
+        const dt = new Date(dateArray[i].dt_txt)
+        const hours = dt.getHours().toString().padStart(2, '0')
+        const minutes = dt.getMinutes().toString().padStart(2, '0')
+        const timeString = `${hours}:${minutes}`
+        timeArray.push(timeString)
+      }
+      return timeArray
+    },
+    getTemperatures(dateArray) {
+      return dateArray.map(({ main }) => main.temp)
+    },
+    setDataForBarChart () {
+      this.labelsForBarChart = this.getTimeLabelsArray(this.filteredOnToday)
+      this.chartIndicators = this.getTemperatures(this.filteredOnToday)
+    },
+    addBlockToList () {
+      this.addItemToBlockList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true})
+    },
+    removeItem () {
+      if (this.selectedCity.isFavorite) {
+        this.removeItemFromFavorite(this.selectedCity.city.id)
+        this.$store.commit('weatherData/SET_IS_OPEN_MODAL', false)
+      } else {
+        this.removeItemFromBlockList(this.selectedCity.city.id)
+        this.$store.commit('weatherData/SET_IS_OPEN_MODAL', false)
+      }
+    },
+    addToFavoritesList () {
+      this.addItemToFavoriteList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true, isFavorite: true})
+    },
+    openModal () {
+      this.$store.commit('weatherData/SET_IS_OPEN_MODAL', true)
     }
   },
   watch: {
-    selectedCity (newValue) {
-      console.log(newValue)
-      const list = this.filteredItems
-      console.log(list)
+    selectedCity: {
+      handler () {
+        this.setDataForBarChart()
+      },
+      deep: true,
+      immediate: true
     }
   }
 }
@@ -93,10 +179,13 @@ export default {
 .city-card__wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 30px;
+  margin: 20px 10px;
   .city-card__item {
-    width: 50%;
-    height: 500px;
+    width: 45%;
+    max-width: 600px;
+    min-width: 300px;
+    min-height: 300px;
+    height: 480px;
     padding: 10px;
     border: 1px solid gray;
     border-radius: 10px;
@@ -113,12 +202,32 @@ export default {
       display: flex;
       justify-content: space-between;
       margin-top: 10px;
+      .item-action__group-days :first-child,
+      .item-action__group-control :first-child{
+        margin-right: 10px;
+      }
+      .item-action__group-control {
+        display: flex;
+        .item-action-favorite-icon {
+          width: 30px;
+          height: 30px;
+          img {
+            width: 100%;
+          }
+        }
+      }
+
       .item-action__button--yellow {
         background: #a8a02d;
         color: white;
+        margin-right: 10px;
       }
       .item-action__button--green {
         background: #288f5e;
+        color: white;
+      }
+      .item-action__button--red {
+        background: #8f3128;
         color: white;
       }
     }
@@ -139,6 +248,23 @@ export default {
   }
   .bold {
     font-weight: bold;
+  }
+}
+
+@media screen and (max-width: 460px) {
+  .city-card__wrapper {
+    .city-card__item {
+      width: 100%;
+      height: 380px;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .city-card__wrapper {
+    .city-card__item {
+      height: 400px;
+    }
   }
 }
 </style>

@@ -83,4 +83,12 @@ export default {
     }
   }
 }
+
+@media screen and (max-width: 460px) {
+  .header {
+    .header-nav {
+      justify-content: space-between;
+    }
+  }
+}
 </style>

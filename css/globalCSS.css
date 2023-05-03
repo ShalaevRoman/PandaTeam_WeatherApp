@@ -1,19 +1,29 @@
+@media screen and (max-width: 460px) {
+    .search-weather__title,
+    .blocks-list__title,
+    .footer-title,
+    .favorites-title {
+        font-size: 24px;
+    }
+}
+
 h1  {
-    text-align: center;
-    color: #cecece;
-    font-weight: normal;
-    font-family: 'Ultra', sans-serif;
-    font-size: 36px;
-    line-height: 42px;
-    text-transform: uppercase;
-    text-shadow: 0 2px #1a4d32, 0 3px #288f5e;
+text-align: center;
+color: #cecece;
+font-weight: normal;
+font-family: 'Ultra', sans-serif;
+font-size: 36px;
+line-height: 42px;
+text-transform: uppercase;
+text-shadow: 0 2px #1a4d32, 0 3px #288f5e;
 }
 
 a {
-    color: #cecece;
-    font-weight: normal;
-    font-family: 'Ultra', sans-serif;
-    font-size: 16px;
-    line-height: 10px;
-    text-shadow: 0 2px #1a4d32, 0 3px #288f5e;
+color: #cecece;
+font-weight: normal;
+font-family: 'Ultra', sans-serif;
+font-size: 16px;
+line-height: 10px;
+text-shadow: 0 2px #1a4d32, 0 3px #288f5e;
 }
+

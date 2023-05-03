@@ -30,5 +30,6 @@ export default {
   width: 100%;
   max-width: 1200px;
   min-width: 360px;
+  margin: 0 10px;
 }
 </style>
