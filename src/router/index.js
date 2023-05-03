@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import SearchWeather from '../components/searchWeather/SearchWeather.vue'
+import SearchWeather from '../components/searchWeather/SearchWeatherPage.vue'
 
 Vue.use(VueRouter)
 

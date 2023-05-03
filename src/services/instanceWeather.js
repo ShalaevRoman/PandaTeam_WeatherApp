@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = process.env.VUE_APP_BASE_URL_GOOGLE
+const BASE_URL = process.env.VUE_APP_BASE_URL_WEATHER
 
 const instanceWeather = axios.create({
   baseURL: BASE_URL,

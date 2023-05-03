@@ -40,7 +40,7 @@ export default {
   .header-logo__wrapper {
     display: flex;
     justify-content: center;
-    margin: 50px 0;
+    margin: 20px 0;
 
     .header-logo__link {
       .header__logo-img {
