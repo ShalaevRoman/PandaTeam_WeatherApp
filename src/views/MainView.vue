@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import HeaderComponent from "@/components/Header.vue";
-import MainComponent from "@/components/Main.vue";
-import FooterComponent from "@/components/Footer.vue";
+import HeaderComponent from '@/components/Header.vue'
+import MainComponent from '@/components/Main.vue'
+import FooterComponent from '@/components/Footer.vue'
 
 export default {
   name: 'MainView',

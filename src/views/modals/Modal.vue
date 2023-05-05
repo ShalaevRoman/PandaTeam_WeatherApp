@@ -23,11 +23,20 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from "vuex";
+
 export default {
   name: 'ModalComponent',
+  computed: {
+    ...mapGetters('weatherData', ['searchItem'])
+  },
   methods: {
+    ...mapActions('weatherData', ['removeItemFromFavorite', 'removeItemFromBlockList']),
     deleteItem() {
-      this.$emit('delete')
+      this.searchItem.isFavorite ?
+        this.removeItemFromFavorite(this.searchItem.id)
+        : this.removeItemFromBlockList(this.searchItem.id)
+      this.closeModal()
     },
     closeModal() {
       this.$store.commit('weatherData/SET_IS_OPEN_MODAL', false)
@@ -42,7 +51,7 @@ export default {
   align-items: center;
   justify-content: center;
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
   top: 0;
   left: 0;
   width: 100%;
@@ -55,7 +64,7 @@ export default {
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   height: 300px;
   width: 300px;

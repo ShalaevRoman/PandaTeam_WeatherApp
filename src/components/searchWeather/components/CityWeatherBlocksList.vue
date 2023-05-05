@@ -8,8 +8,8 @@
     </h1>
     <div class="blocks-list__items">
       <CityWeatherCard
-        v-for="(block, i) in weatherBlockList"
-        :key="block.city.name + i"
+        v-for="block in weatherBlockList"
+        :key="block.city.id"
         :selected-city="block"
       />
     </div>

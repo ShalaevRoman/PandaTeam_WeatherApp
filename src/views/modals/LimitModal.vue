@@ -1,11 +1,11 @@
 <template>
   <div class="modal-limit">
     <div class="modal-limit__content">
-      <h1 class="content__title">
-        Limit exceeded
+      <h1 class="modal-limit__title">
+        {{ limitModalDescription.title }}
       </h1>
-      <p class="content__description">
-        Delete an element to add a new one)
+      <p class="modal-limit__description">
+        {{ limitModalDescription.subTitle }}
       </p>
       <div class="content__action">
         <button
@@ -20,17 +20,19 @@
 </template>
 
 <script>
+import  { mapGetters } from 'vuex'
+
 export default {
   name: 'LimitModal',
   methods: {
-    deleteItem() {
-      this.$emit('delete')
-    },
     closeModal() {
       this.$store.commit('weatherData/SET_IS_LIMIT_STATE', false)
     }
+  },
+  computed: {
+    ...mapGetters('weatherData', ['limitModalDescription']),
   }
-};
+}
 </script>
 
 <style scoped lang="scss">
@@ -39,12 +41,11 @@ export default {
   align-items: center;
   justify-content: center;
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.1);
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999;
+  z-index: 9998;
 }
 
 .modal-limit__content {
@@ -53,14 +54,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.3);
+  background: black;
   border-radius: 10px;
   height: 300px;
   width: 300px;
   overflow: auto;
-
-  .content__description {
-    font-family: 'Ultra', sans-serif;
+  color: white;
+  .modal-limit__description {
     color: white;
   }
 

@@ -4,15 +4,18 @@
       v-if="isCityFound"
       class="input-search__error-text"
     >
-      City not found!
+      {{ $t('inputSearchErrorText') }}
     </p>
     <input
       class="input-search__input"
       type="text"
       v-model="search"
       @input="handleInput"
-      placeholder="Enter the name of the city"
+      :placeholder="$t('inputSearchPlaceholder')"
     >
+    <PreloaderComponent
+      v-if="isShowPreloader"
+    />
     <div
       v-if="isShowList"
       class="input-search__dropdown"
@@ -32,15 +35,17 @@
 <script>
 import { debounce } from 'lodash';
 import {mapActions, mapGetters} from "vuex";
+import PreloaderComponent from "@/views/modals/Preloader.vue";
 export default {
   name: 'SearchServices',
+  components: {PreloaderComponent},
   data () {
     return {
       search: '',
     }
   },
   computed: {
-    ...mapGetters('weatherData', ['cityList', 'isCityFound', 'selectedCity']),
+    ...mapGetters('weatherData', ['cityList', 'isCityFound', 'selectedCity', 'isShowPreloader']),
     isShowList () {
       return  this.cityList.length > 0
     }
@@ -51,7 +56,7 @@ export default {
         this.getLocation(this.search)
       }, 600),
     selectCity(city) {
-      this.getWeatherByGeo({ lat: city.geometry.coordinates[1], lon: city.geometry.coordinates[0] })
+      this.getWeatherByGeo({ lat: city.geometry.coordinates[1], lon: city.geometry.coordinates[0], local: this.$i18n.locale })
       this.$store.commit('weatherData/SET_CITY_LIST', [])
       this.search = this.firstThreeWords(city.properties.display_name)
     },
@@ -101,10 +106,10 @@ export default {
     max-width: 350px;
     padding: 12px;
     position: absolute;
-    top: 68px;
-    background-color: #dcdcdc;
-    border: 1px solid #3d3d3d;
-    border-radius: 10px;
+    background-color: white;
+    top: 70px;
+    border: 1px solid gray;
+    border-radius: 10px 0 0 10px;
     z-index: 1;
     overflow-y: scroll;
 

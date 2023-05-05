@@ -1,7 +1,7 @@
 <template>
   <div class="footer">
     <h1 class="footer-title">
-      Some footer
+      {{ $t('footerTitle') }}
     </h1>
   </div>
 </template>
@@ -12,6 +12,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+.footer-title {
+  color: black;
+  text-shadow: none;
+  font-size: 12px;
+}
 </style>

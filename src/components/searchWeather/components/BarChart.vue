@@ -2,8 +2,8 @@
   <div class="bar-wrapper">
     <Bar
       id="my-chart-id"
-      :options="chartOptions"
-      :data="chartData"
+      :options="getChartOptions"
+      :data="getChartData"
     />
   </div>
 </template>
@@ -31,20 +31,32 @@ export default {
       default () {
         return []
       },
+    },
+    chartName: {
+      require: true,
+      type: String,
+      default () {
+        return 'Temperature'
+      }
     }
   },
   data() {
-    return {
-      chartData: {
+    return {}
+  },
+  computed: {
+    getChartData() {
+      return {
         labels: this.labels,
         datasets: [
           {
-            label: 'Temperature',
+            label: this.chartName,
             data: this.chartIndicators
           }
         ]
-      },
-      chartOptions: {
+      }
+    },
+    getChartOptions () {
+      return {
         responsive: true
       }
     }
@@ -53,4 +65,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.bar-wrapper {
+  height: 250px;
+}
 </style>

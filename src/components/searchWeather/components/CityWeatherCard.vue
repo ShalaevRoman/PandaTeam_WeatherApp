@@ -2,24 +2,23 @@
   <div
     class="city-card__wrapper"
   >
-    <ModalComponent
-      v-if="isOpenModal"
-      @delete="removeItem"
-    />
-    <LimitModal
-      v-if="isLimitExceeded"
-    />
     <div class="city-card__item">
       <h3 class="city-card__title">
-        Weather data
+        {{ $t('cityCardTitle') }}
       </h3>
       <div class="city-card__item-action">
         <div class="item-action__group-days">
-          <button class="item-action__button">
-            Day
+          <button
+            @click="setDataForBarChartOnToday()"
+            class="item-action__button"
+          >
+            {{ $t('buttonDay') }}
           </button>
-          <button class="item-action__button">
-            5 days
+          <button
+            @click="setDataForBarCharOnFiveDay()"
+            class="item-action__button"
+          >
+            {{ $t('button6Days') }}
           </button>
         </div>
         <div class="item-action__group-control">
@@ -37,51 +36,52 @@
             @click="addToFavoritesList()"
             class="item-action__button--yellow"
           >
-            Favorites
+            {{ $t('buttonFavorites') }}
           </button>
           <button
             v-if="selectedCity.isShowAddButton"
             class="item-action__button--green"
             @click="addBlockToList()"
           >
-            + Add block
+            {{ $t('buttonAddBlock') }}
           </button>
           <button
             v-if="selectedCity.isShowDeleteButton"
             class="item-action__button--red"
-            @click="openModal()"
+            @click="removeItem()"
           >
-            Delete
+            {{ $t('buttonDelete') }}
           </button>
         </div>
       </div>
       <div class="city-card__description">
         <p class="city-card__city">
-          City:
+          {{ $t('city') }}
           <span class="bold">
             {{ selectedCity.city.name }}
           </span>
         </p>
         <p class="city-card__population">
-          Population:
+          {{ $t('population') }}
           <span class="bold">
             {{ selectedCity.city.population }}
           </span>
         </p>
         <p class="city-card__sunrise">
-          Sunrise:
+          {{ $t('sunrise') }}
           <span class="bold">
             {{ formattedTime(selectedCity.city.sunrise) }}
           </span>
         </p>
         <p class="city-card__sunset">
-          Sunset:
+          {{ $t('sunset') }}
           <span class="bold">
             {{ formattedTime(selectedCity.city.sunset) }}
           </span>
         </p>
       </div>
       <BarChart
+        :chart-name="chartName"
         :labels="labelsForBarChart"
         :chart-indicators="chartIndicators"
       />
@@ -90,14 +90,14 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
-import BarChart from "@/components/searchWeather/components/BarChart.vue";
-import ModalComponent from "@/views/Modal.vue";
-import LimitModal from "@/views/LimitModal.vue";
+import barChartDataMixin from '@/mixins/barChartData.mixin'
+import { mapActions, mapGetters } from 'vuex'
+import BarChart from '@/components/searchWeather/components/BarChart.vue'
 
 export default {
   name: 'CityWeatherCard',
-  components: {LimitModal, ModalComponent, BarChart },
+  mixins: [ barChartDataMixin ],
+  components: { BarChart },
   props: {
     selectedCity: {
       required: true,
@@ -109,64 +109,55 @@ export default {
   },
   data () {
     return {
-      labelsForBarChart: [],
-      chartIndicators: []
     }
   },
   computed: {
-    ...mapGetters('weatherData', ['isOpenModal', 'isLimitExceeded']),
-    filteredOnToday() {
-      const today = new Date().toISOString().slice(0, 10)
-      return this.selectedCity.list.filter(item => item.dt_txt.slice(0, 10) === today)
-    }
+    ...mapGetters('weatherData', [
+      'weatherBlockList',
+      'favoritesList'
+    ])
   },
   methods: {
-    ...mapActions('weatherData', ['addItemToBlockList', 'removeItemFromBlockList', 'addItemToFavoriteList', 'removeItemFromFavorite']),
+    ...mapActions('weatherData', [
+      'addItemToBlockList',
+      'removeItemFromBlockList',
+      'addItemToFavoriteList',
+      'removeItemFromFavorite'
+    ]),
     formattedTime (time) {
       const sunriseDate = new Date(time * 1000)
       return sunriseDate.toLocaleTimeString()
     },
-    getTimeLabelsArray(dateArray) {
-      const timeArray = []
-      for (let i = 0; i < dateArray.length; i++) {
-        const dt = new Date(dateArray[i].dt_txt)
-        const hours = dt.getHours().toString().padStart(2, '0')
-        const minutes = dt.getMinutes().toString().padStart(2, '0')
-        const timeString = `${hours}:${minutes}`
-        timeArray.push(timeString)
-      }
-      return timeArray
-    },
-    getTemperatures(dateArray) {
-      return dateArray.map(({ main }) => main.temp)
-    },
-    setDataForBarChart () {
-      this.labelsForBarChart = this.getTimeLabelsArray(this.filteredOnToday)
-      this.chartIndicators = this.getTemperatures(this.filteredOnToday)
-    },
     addBlockToList () {
-      this.addItemToBlockList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true})
+      if (this.isObjectAlreadyExist(this.selectedCity.city.id, this.weatherBlockList)) {
+        this.$store.commit('weatherData/SET_MODAL_DESCRIPTION', {title: 'Ooops...', subTitle: 'This block already exists'})
+        this.$store.commit('weatherData/SET_IS_LIMIT_STATE', true)
+      } else if (this.weatherBlockList.length >= 5) {
+        this.$store.commit('weatherData/SET_MODAL_DESCRIPTION', {title: 'Limit exceeded', subTitle: 'Delete one element to add a new one'})
+        this.$store.commit('weatherData/SET_IS_LIMIT_STATE', true)
+      } else { this.addItemToBlockList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true}) }
     },
     removeItem () {
-      if (this.selectedCity.isFavorite) {
-        this.removeItemFromFavorite(this.selectedCity.city.id)
-        this.$store.commit('weatherData/SET_IS_OPEN_MODAL', false)
-      } else {
-        this.removeItemFromBlockList(this.selectedCity.city.id)
-        this.$store.commit('weatherData/SET_IS_OPEN_MODAL', false)
-      }
+      this.$store.commit('weatherData/SET_IS_OPEN_MODAL', true)
+      this.$store.commit('weatherData/SET_SEARCH_ITEM', {id: this.selectedCity.city.id, isFavorite: this.selectedCity.isFavorite || false })
     },
     addToFavoritesList () {
-      this.addItemToFavoriteList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true, isFavorite: true})
+      if (this.isObjectAlreadyExist(this.selectedCity.city.id, this.favoritesList)) {
+        this.$store.commit('weatherData/SET_MODAL_DESCRIPTION', {title: 'Sorry...', subTitle: 'This city already in favorites'})
+        this.$store.commit('weatherData/SET_IS_LIMIT_STATE', true)
+      } else if (this.favoritesList.length >= 5) {
+        this.$store.commit('weatherData/SET_MODAL_DESCRIPTION', {title: 'Limit exceeded', subTitle: 'Delete one element to add a new one'})
+        this.$store.commit('weatherData/SET_IS_LIMIT_STATE', true)
+      } else { this.addItemToFavoriteList({...this.selectedCity, isShowAddButton: false, isShowDeleteButton: true, isFavorite: true}) }
     },
-    openModal () {
-      this.$store.commit('weatherData/SET_IS_OPEN_MODAL', true)
+    isObjectAlreadyExist (id, array) {
+      return array.some(item => item.city.id === id)
     }
   },
   watch: {
     selectedCity: {
       handler () {
-        this.setDataForBarChart()
+        this.setDataForBarChartOnToday()
       },
       deep: true,
       immediate: true
@@ -179,7 +170,7 @@ export default {
 .city-card__wrapper {
   display: flex;
   justify-content: center;
-  margin: 20px 10px;
+  margin: 42px 10px 10px 10px;
   .city-card__item {
     width: 45%;
     max-width: 600px;
@@ -202,12 +193,10 @@ export default {
       display: flex;
       justify-content: space-between;
       margin-top: 10px;
-      .item-action__group-days :first-child,
-      .item-action__group-control :first-child{
-        margin-right: 10px;
-      }
-      .item-action__group-control {
+      .item-action__group-control,
+      .item-action__group-days {
         display: flex;
+        justify-content: space-between;
         .item-action-favorite-icon {
           width: 30px;
           height: 30px;
@@ -220,7 +209,6 @@ export default {
       .item-action__button--yellow {
         background: #a8a02d;
         color: white;
-        margin-right: 10px;
       }
       .item-action__button--green {
         background: #288f5e;
